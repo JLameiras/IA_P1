@@ -37,22 +37,32 @@ class TakuzuState:
 class Board:
     """Representação interna de um tabuleiro de Takuzu."""
 
+    def __init__(self, N, board):
+        self.N = N
+        self.board = board
+
     def get_number(self, row: int, col: int) -> int:
         """Devolve o valor na respetiva posição do tabuleiro."""
-        # TODO
-        pass
+        return self.board[row][col]
 
     def adjacent_vertical_numbers(self, row: int, col: int) -> (int, int):
         """Devolve os valores imediatamente abaixo e acima,
         respectivamente."""
-        # TODO
-        pass
+        if row == 0:
+            return self.board[row+1][col]
+        if row == (self.N - 1):
+            return self.board[row-1][col]
+        return self.board[row + 1][col], self.board[row-1][col]
+
 
     def adjacent_horizontal_numbers(self, row: int, col: int) -> (int, int):
         """Devolve os valores imediatamente à esquerda e à direita,
         respectivamente."""
-        # TODO
-        pass
+        if col == 0:
+            return self.board[row][col+1]
+        if col == (self.N - 1):
+            return self.board[row][col-1]
+        return self.board[row][col-1], self.board[row][col+1]
 
     @staticmethod
     def parse_instance_from_stdin():
@@ -68,17 +78,17 @@ class Board:
         # TODO
 
         with open(sys.argv[1], 'r') as f:
-            lines = f.readlines()
+            N = f.readline()[0]
+            boardLines = f.readline()
 
-        count = 0
+        board = numpy.empty((N, N))
+        count = -1
 
-
-        for line in lines:
+        for line in boardLines:
             count += 1
+            board[count] = np.fromstring(line, dtype=int, sep='\t')
 
-
-
-        pass
+        return Board(N, board)
 
     # TODO: outros metodos da classe
 
