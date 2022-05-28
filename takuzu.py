@@ -3,10 +3,11 @@
 # Além das funções e classes já definidas, podem acrescentar outras que considerem pertinentes.
 
 # Grupo 00:
-# 00000 Nome1
-# 00000 Nome2
+# 100120 Alexandre Coelho
+# 99540 Pedro Lameiras
 
 import sys
+
 from search import (
     Problem,
     Node,
@@ -26,6 +27,7 @@ class TakuzuState:
         self.id = TakuzuState.state_id
         TakuzuState.state_id += 1
 
+    # Este método é utilizado em caso de empate na gestão da lista de abertos nas procuras informadas.
     def __lt__(self, other):
         return self.id < other.id
 
@@ -64,6 +66,17 @@ class Board:
             > stdin.readline()
         """
         # TODO
+
+        with open(sys.argv[1], 'r') as f:
+            lines = f.readlines()
+
+        count = 0
+
+        for line in lines:
+            count += 1
+
+
+
         pass
 
     # TODO: outros metodos da classe
