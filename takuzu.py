@@ -72,6 +72,7 @@ class Board:
 
         count = 0
 
+
         for line in lines:
             count += 1
 
