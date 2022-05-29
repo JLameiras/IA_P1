@@ -81,7 +81,7 @@ class Board:
             N = f.readline()[0]
             boardLines = f.readline()
 
-        board = numpy.empty((N, N))
+        board = np.empty((N, N))
         count = -1
 
         for line in boardLines:
@@ -103,7 +103,18 @@ class Takuzu(Problem):
         """Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento."""
         # TODO
-        pass
+
+        emptyCells = zip(*np.where(TakuzuState.Board.board == 2))
+
+        possibleActions
+        count = -1
+
+        for _ in emptyCells:
+            count += 1
+            possibleActions.append(emptyCells[count].append(0))
+            possibleActions.append(emptyCells[count].append(1))
+
+        return possibleActions
 
     def result(self, state: TakuzuState, action):
         """Retorna o estado resultante de executar a 'action' sobre
