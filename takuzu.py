@@ -123,10 +123,13 @@ class Takuzu(Problem):
         self.actions(state)."""
         # TODO
 
+        if action not in self.actions(self, state):
+            return
 
+        newState = state
+        newState.board.board[action[0]][action[1]] = action[2]
 
-
-        pass
+        return newState
 
     def goal_test(self, state: TakuzuState):
         """Retorna True se e só se o estado passado como argumento é
