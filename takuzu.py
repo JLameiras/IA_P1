@@ -49,19 +49,19 @@ class Board:
         """Devolve os valores imediatamente abaixo e acima,
         respectivamente."""
         if row == 0:
-            return self.board[row+1][col]
+            return self.board[row + 1][col], none
         if row == (self.N - 1):
-            return self.board[row-1][col]
-        return self.board[row + 1][col], self.board[row-1][col]
+            return none, self.board[row - 1][col]
+        return self.board[row + 1][col], self.board[row - 1][col]
 
 
     def adjacent_horizontal_numbers(self, row: int, col: int) -> (int, int):
         """Devolve os valores imediatamente à esquerda e à direita,
         respectivamente."""
         if col == 0:
-            return self.board[row][col+1]
+            return none, self.board[row][col+1]
         if col == (self.N - 1):
-            return self.board[row][col-1]
+            return self.board[row][col-1], none
         return self.board[row][col-1], self.board[row][col+1]
 
     @staticmethod
@@ -79,7 +79,7 @@ class Board:
 
         with open(sys.argv[1], 'r') as f:
             N = f.readline()[0]
-            boardLines = f.readline()
+            boardLines = f.readlines()
 
         board = np.empty((N, N))
         count = -1
@@ -104,7 +104,7 @@ class Takuzu(Problem):
         partir do estado passado como argumento."""
         # TODO
 
-        emptyCells = zip(*np.where(TakuzuState.Board.board == 2))
+        emptyCells = zip(*np.where(state.Board.board == 2))
 
         possibleActions
         count = -1
@@ -122,6 +122,10 @@ class Takuzu(Problem):
         das presentes na lista obtida pela execução de
         self.actions(state)."""
         # TODO
+
+
+
+
         pass
 
     def goal_test(self, state: TakuzuState):
