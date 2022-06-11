@@ -8,6 +8,8 @@
 
 import sys
 
+import numpy as np
+
 from search import (
     Problem,
     Node,
@@ -96,7 +98,6 @@ class Board:
 class Takuzu(Problem):
     def __init__(self, board: Board):
         """O construtor especifica o estado inicial."""
-        # TODO
         pass
 
     def actions(self, state: TakuzuState):
@@ -104,7 +105,7 @@ class Takuzu(Problem):
         partir do estado passado como argumento."""
         # TODO
 
-        emptyCells = zip(*np.where(state.Board.board == 2))
+        emptyCells = zip(*np.where(state.board.board == 2))
 
         possibleActions
         count = -1
@@ -124,7 +125,7 @@ class Takuzu(Problem):
         # TODO
 
         if action not in self.actions(self, state):
-            return none
+            return None
 
         newState = state
         newState.board.board[action[0]][action[1]] = action[2]
@@ -135,8 +136,16 @@ class Takuzu(Problem):
         """Retorna True se e só se o estado passado como argumento é
         um estado objetivo. Deve verificar se todas as posições do tabuleiro
         estão preenchidas com uma sequência de números adjacentes."""
-        # TODO
-        pass
+
+        board = state.board.board
+
+        if 2 not in board and np.array_equal(board, np.unique(board, axis=0)) and \
+            np.array_equal(board, np.unique(board, axis=1)) and \
+            np.count_nonzero(np.absolute(np.subtract(np.count_nonzero(board, axis=0), np.count_nonzero(board == 0,
+            axis=0))) > 1) == 0 and np.count_nonzero(np.absolute(np.subtract(np.count_nonzero(board, axis=1),
+            np.count_nonzero(board == 0, axis=1))) > 1) == 0:
+            return True
+        return False
 
     def h(self, node: Node):
         """Função heuristica utilizada para a procura A*."""
