@@ -124,7 +124,7 @@ class Takuzu(Problem):
         # TODO
 
         if action not in self.actions(self, state):
-            return
+            return none
 
         newState = state
         newState.board.board[action[0]][action[1]] = action[2]
