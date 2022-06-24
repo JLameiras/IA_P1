@@ -51,9 +51,9 @@ class Board:
         """Devolve os valores imediatamente abaixo e acima,
         respectivamente."""
         if row == 0:
-            return self.board[row + 1][col], none
+            return self.board[row + 1][col], None
         if row == (self.N - 1):
-            return none, self.board[row - 1][col]
+            return None, self.board[row - 1][col]
         return self.board[row + 1][col], self.board[row - 1][col]
 
 
@@ -61,9 +61,9 @@ class Board:
         """Devolve os valores imediatamente à esquerda e à direita,
         respectivamente."""
         if col == 0:
-            return none, self.board[row][col+1]
+            return None, self.board[row][col+1]
         if col == (self.N - 1):
-            return self.board[row][col-1], none
+            return self.board[row][col-1], None
         return self.board[row][col-1], self.board[row][col+1]
 
     @staticmethod
@@ -105,17 +105,47 @@ class Takuzu(Problem):
         partir do estado passado como argumento."""
         # TODO
 
-        emptyCells = zip(*np.where(state.board.board == 2))
+        board = state.board.board
+        positions = ((x, y) for x in range(0, board.N - 1) for y in range(0, board.N - 1))
+        actions = []
 
-        possibleActions
-        count = -1
+        # Tem problemas em casos 1 1 2 1 1 0 0 2 0 0  -> acoes repetidas
+        for position in positions:
+            value = board[position]
+            horizontal = board.adjacent_horizontal_numbers(position)
+            vertical = board.adjacent_vertical_numbers(position)
+            if value == 2:
+                if horizontal[0] == horizontal[1]:
+                    actions.append((position, not horizontal[0]))
+                    board[position] = not horizontal[0]
+                elif vertical[0] == vertical[1]:
+                    actions.append((position, not vertical[0]))
+                    board[position] = not vertical[0]
+            else:
+                if value == horizontal[0] and horizontal[1] == 2:
+                    actions.append(((position[0] + 1, position[1]), not value))
+                    board[(position[0] + 1, position[1])] = not value
+                if value == horizontal[1] and horizontal[0] == 2:
+                    actions.append(((position[0] - 1, position[1]), not value))
+                    board[(position[0] - 1, position[1])] = not value
+                if value == vertical[0] and vertical[1] == 2:
+                    actions.append(((position[0], position[1] + 1), not value))
+                    board[(position[0], position[1] + 1)] = not value
+                if value == vertical[1] and vertical[0] == 2:
+                    actions.append(((position[0], position[1] - 1), not value))
+                    board[(position[0], position[1] - 1)] = not value
 
-        for _ in emptyCells:
-            count += 1
-            possibleActions.append(emptyCells[count].append(0))
-            possibleActions.append(emptyCells[count].append(1))
+        emptyCells = list(zip(np.where(board == 2)))
 
-        return possibleActions
+        # Restore board to initial state
+        for action in actions:
+            board[action[0]] = 2
+
+        for position in emptyCells:
+            actions.append((position, 0))
+            actions.append((position, 1))
+
+        return actions
 
     def result(self, state: TakuzuState, action):
         """Retorna o estado resultante de executar a 'action' sobre
