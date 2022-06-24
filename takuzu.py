@@ -77,10 +77,8 @@ class Board:
             > from sys import stdin
             > stdin.readline()
         """
-        # TODO
-
         with open(sys.argv[1], 'r') as f:
-            N = f.readline()[0]
+            N = int(f.readline()[0])
             boardLines = f.readlines()
 
         board = np.empty((N, N))
@@ -98,20 +96,20 @@ class Board:
 class Takuzu(Problem):
     def __init__(self, board: Board):
         """O construtor especifica o estado inicial."""
-        pass
+        self.initial = TakuzuState(board)
 
     def actions(self, state: TakuzuState):
         """Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento."""
 
         board = state.board.board
-        positions = ((x, y) for x in range(0, board.N - 1) for y in range(0, board.N - 1))
+        positions = ((x, y) for x in range(0, state.board.N - 1) for y in range(0, state.board.N - 1))
         actions = []
 
         for position in positions:
             value = board[position]
-            horizontal = board.adjacent_horizontal_numbers(position)
-            vertical = board.adjacent_vertical_numbers(position)
+            horizontal = state.board.adjacent_horizontal_numbers(position[0], position[1])
+            vertical = state.board.adjacent_vertical_numbers(position[0], position[1])
             if value == 2:
                 if horizontal[0] == horizontal[1]:
                     actions.append((position[0], position[1], not horizontal[0]))
@@ -133,7 +131,7 @@ class Takuzu(Problem):
                     actions.append((position[0], position[1] - 1, not value))
                     board[(position[0], position[1] - 1)] = not value
 
-        emptyCells = list(zip(np.where(board == 2)))
+        emptyCells = np.dstack(np.where(board == 2))[0]
         a = []
 
         for position in emptyCells:
@@ -143,8 +141,9 @@ class Takuzu(Problem):
         # Restore board to initial state
         for action in actions:
             board[action[0]][action[1]] = 2
+        actions.append(a)
 
-        return actions.append(a)
+        return actions
 
     def result(self, state: TakuzuState, action):
         """Retorna o estado resultante de executar a 'action' sobre
@@ -153,11 +152,13 @@ class Takuzu(Problem):
         self.actions(state)."""
         # TODO
 
-        if action not in self.actions(self, state):
+        if action not in self.actions(state):
             return None
 
-        newState = state
-        newState.board.board[action[0]][action[1]] = action[2]
+        newBoard = np.copy(state.board.board)
+        print(newBoard)
+        newBoard[action[0], action[1]] = action[2]
+        newState = TakuzuState(Board(state.board.N, newBoard))
 
         return newState
 
@@ -185,9 +186,12 @@ class Takuzu(Problem):
 
 
 if __name__ == "__main__":
-    # TODO:
+    import sys
     # Ler o ficheiro de input de sys.argv[1],
+    board = Board.parse_instance_from_stdin()
+    problem = Takuzu(board)
+    goal = depth_first_tree_search(problem)
     # Usar uma técnica de procura para resolver a instância,
     # Retirar a solução a partir do nó resultante,
     # Imprimir para o standard output no formato indicado.
-    pass
+
