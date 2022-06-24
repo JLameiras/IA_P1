@@ -142,7 +142,7 @@ class Takuzu(Problem):
 
         # Restore board to initial state
         for action in actions:
-            board[action[0]] = 2
+            board[action[0]][action[1]] = 2
 
         return actions.append(a)
 
