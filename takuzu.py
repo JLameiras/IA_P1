@@ -105,31 +105,31 @@ class Takuzu(Problem):
         board = state.board.board
         positions = ((x, y) for x in range(0, state.board.N - 1) for y in range(0, state.board.N - 1))
         actions = []
-
+        print(board)
         for position in positions:
             value = board[position]
             horizontal = state.board.adjacent_horizontal_numbers(position[0], position[1])
             vertical = state.board.adjacent_vertical_numbers(position[0], position[1])
             if value == 2:
                 if horizontal[0] == horizontal[1]:
-                    actions.append((position[0], position[1], not horizontal[0]))
-                    board[position] = not horizontal[0]
+                    actions.append((position[0], position[1], int(not horizontal[0])))
+                    board[position] = int(not horizontal[0])
                 elif vertical[0] == vertical[1]:
-                    actions.append((position[0], position[1], not vertical[0]))
-                    board[position] = not vertical[0]
+                    actions.append((position[0], position[1], int(not vertical[0])))
+                    board[position] = int(not vertical[0])
             else:
                 if value == horizontal[0] and horizontal[1] == 2:
-                    actions.append((position[0] + 1, position[1], not value))
-                    board[(position[0] + 1, position[1])] = not value
+                    actions.append((position[0] + 1, position[1], int(not value)))
+                    board[(position[0] + 1, position[1])] = int(not value)
                 if value == horizontal[1] and horizontal[0] == 2:
-                    actions.append((position[0] - 1, position[1], not value))
-                    board[(position[0] - 1, position[1])] = not value
+                    actions.append((position[0] - 1, position[1], int(not value)))
+                    board[(position[0] - 1, position[1])] = int(not value)
                 if value == vertical[0] and vertical[1] == 2:
-                    actions.append((position[0], position[1] + 1, not value))
-                    board[(position[0], position[1] + 1)] = not value
+                    actions.append((position[0], position[1] + 1, int(not value)))
+                    board[(position[0], position[1] + 1)] = int(not value)
                 if value == vertical[1] and vertical[0] == 2:
-                    actions.append((position[0], position[1] - 1, not value))
-                    board[(position[0], position[1] - 1)] = not value
+                    actions.append((position[0], position[1] - 1, int(not value)))
+                    board[(position[0], position[1] - 1)] = int(not value)
 
         emptyCells = np.dstack(np.where(board == 2))[0]
         a = []
@@ -141,9 +141,11 @@ class Takuzu(Problem):
         # Restore board to initial state
         for action in actions:
             board[action[0]][action[1]] = 2
+        print(board)
         actions.append(a)
+        print(actions[0])
 
-        return actions
+        return actions[0]
 
     def result(self, state: TakuzuState, action):
         """Retorna o estado resultante de executar a 'action' sobre
@@ -156,7 +158,7 @@ class Takuzu(Problem):
             return None
 
         newBoard = np.copy(state.board.board)
-        print(newBoard)
+
         newBoard[action[0], action[1]] = action[2]
         newState = TakuzuState(Board(state.board.N, newBoard))
 
@@ -169,13 +171,27 @@ class Takuzu(Problem):
 
         board = state.board.board
 
-        if 2 not in board and np.array_equal(board, np.unique(board, axis=0)) and \
-            np.array_equal(board, np.unique(board, axis=1)) and \
-            np.count_nonzero(np.absolute(np.subtract(np.count_nonzero(board, axis=0), np.count_nonzero(board == 0,
-            axis=0))) > 1) == 0 and np.count_nonzero(np.absolute(np.subtract(np.count_nonzero(board, axis=1),
-            np.count_nonzero(board == 0, axis=1))) > 1) == 0:
-            return True
-        return False
+        #Check if all positions filled
+        if 2 in board:
+            return False
+
+        a = np.append(np.count_nonzero(board==1, axis=0), np.count_nonzero(board==1, axis=1), np.count_nonzero(board==0, axis=0), np.count_nonzero(board==0, axis=1))
+
+        #Check if the proportion of 1's and 0's is correct in the grid
+        for x in a:
+            if x > board.N / 2 + board.N % 2:
+                return False
+
+        #Check if elements respect problem rules
+        positions = ((x, y) for x in range(0, state.board.N - 1) for y in range(0, state.board.N - 1))
+        for position in positions:
+            horizontal = Board.adjacent_horizontal_numbers(position[0], position[1])
+            vertical = Board.adjacent_vertical_numbers(position[0], position[1])
+            if board[position[0], position[1]] == horizontal[0] == horizontal[1] or \
+            board[position[0], position[1]] == vertical[0] == vertical[1]:
+                return False
+
+        return True
 
     def h(self, node: Node):
         """Função heuristica utilizada para a procura A*."""
