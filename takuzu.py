@@ -116,23 +116,23 @@ class Takuzu(Problem):
             vertical = board.adjacent_vertical_numbers(position)
             if value == 2:
                 if horizontal[0] == horizontal[1]:
-                    actions.append((position, not horizontal[0]))
+                    actions.append((position[0], position[1], not horizontal[0]))
                     board[position] = not horizontal[0]
                 elif vertical[0] == vertical[1]:
-                    actions.append((position, not vertical[0]))
+                    actions.append((position[0], position[1], not vertical[0]))
                     board[position] = not vertical[0]
             else:
                 if value == horizontal[0] and horizontal[1] == 2:
-                    actions.append(((position[0] + 1, position[1]), not value))
+                    actions.append((position[0] + 1, position[1], not value))
                     board[(position[0] + 1, position[1])] = not value
                 if value == horizontal[1] and horizontal[0] == 2:
-                    actions.append(((position[0] - 1, position[1]), not value))
+                    actions.append((position[0] - 1, position[1], not value))
                     board[(position[0] - 1, position[1])] = not value
                 if value == vertical[0] and vertical[1] == 2:
-                    actions.append(((position[0], position[1] + 1), not value))
+                    actions.append((position[0], position[1] + 1, not value))
                     board[(position[0], position[1] + 1)] = not value
                 if value == vertical[1] and vertical[0] == 2:
-                    actions.append(((position[0], position[1] - 1), not value))
+                    actions.append((position[0], position[1] - 1, not value))
                     board[(position[0], position[1] - 1)] = not value
 
         emptyCells = list(zip(np.where(board == 2)))
@@ -142,8 +142,8 @@ class Takuzu(Problem):
             board[action[0]] = 2
 
         for position in emptyCells:
-            actions.append((position, 0))
-            actions.append((position, 1))
+            actions.append((position[0], position[1], 0))
+            actions.append((position[0], position[1], 1))
 
         return actions
 
