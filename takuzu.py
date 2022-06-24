@@ -175,7 +175,9 @@ class Takuzu(Problem):
         if 2 in board:
             return False
 
-        a = np.append(np.count_nonzero(board==1, axis=0), np.count_nonzero(board==1, axis=1), np.count_nonzero(board==0, axis=0), np.count_nonzero(board==0, axis=1))
+        a = np.append(np.count_nonzero(board == 1, axis=0), np.count_nonzero(board == 1, axis=1))
+        b = np.append(np.count_nonzero(board == 0, axis=0), np.count_nonzero(board == 0, axis=1))
+        a = np.append(a, b)
 
         #Check if the proportion of 1's and 0's is correct in the grid
         for x in a:
