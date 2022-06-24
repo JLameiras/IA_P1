@@ -103,13 +103,11 @@ class Takuzu(Problem):
     def actions(self, state: TakuzuState):
         """Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento."""
-        # TODO
 
         board = state.board.board
         positions = ((x, y) for x in range(0, board.N - 1) for y in range(0, board.N - 1))
         actions = []
 
-        # Tem problemas em casos 1 1 2 1 1 0 0 2 0 0  -> acoes repetidas
         for position in positions:
             value = board[position]
             horizontal = board.adjacent_horizontal_numbers(position)
@@ -136,16 +134,17 @@ class Takuzu(Problem):
                     board[(position[0], position[1] - 1)] = not value
 
         emptyCells = list(zip(np.where(board == 2)))
+        a = []
+
+        for position in emptyCells:
+            a.append((position[0], position[1], 0))
+            a.append((position[0], position[1], 1))
 
         # Restore board to initial state
         for action in actions:
             board[action[0]] = 2
 
-        for position in emptyCells:
-            actions.append((position[0], position[1], 0))
-            actions.append((position[0], position[1], 1))
-
-        return actions
+        return actions.append(a)
 
     def result(self, state: TakuzuState, action):
         """Retorna o estado resultante de executar a 'action' sobre
