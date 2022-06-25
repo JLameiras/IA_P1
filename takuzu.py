@@ -117,20 +117,42 @@ class Takuzu(Problem):
                 return [[position[0], position[1],
                          int(not state.board.adjacent_vertical_numbers(position[0], position[1])[0])]]
             if position[1] >= 2 and state.board.board[position[0]][position[1] - 1] == state.board.board[position[0]][
-                    position[1] - 2] and state.board.board[position[0]][position[1] - 2] != 2:
+                position[1] - 2] and state.board.board[position[0]][position[1] - 2] != 2:
                 return [[position[0], position[1], int(not state.board.board[position[0]][position[1] - 2])]]
             if position[1] <= state.board.N - 3 and state.board.board[position[0]][position[1] + 1] == \
                     state.board.board[position[0]][position[1] + 2] and state.board.board[position[0]][
-                    position[1] + 2] != 2:
+                position[1] + 2] != 2:
                 return [[position[0], position[1], int(not state.board.board[position[0]][position[1] + 2])]]
             if position[0] >= 2 and state.board.board[position[0] - 1][position[1]] == \
                     state.board.board[position[0] - 2][position[1]] and state.board.board[position[0] - 2][
-                    position[1]] != 2:
+                position[1]] != 2:
                 return [[position[0], position[1], int(not state.board.board[position[0] - 2][position[1]])]]
             if position[0] <= state.board.N - 3 and state.board.board[position[0] + 1][position[1]] == \
                     state.board.board[position[0] + 2][position[1]] and state.board.board[position[0] + 2][
-                    position[1]] != 2:
+                position[1]] != 2:
                 return [[position[0], position[1], int(not state.board.board[position[0] + 2][position[1]])]]
+            if state.board.N % 2 == 0 and np.count_nonzero(state.board.board[position[0]] == 1) == (state.board.N / 2):
+                return [[position[0], position[1], 0]]
+            if state.board.N % 2 == 0 and np.count_nonzero(state.board.board[position[0]] == 0) == (state.board.N / 2):
+                return [[position[0], position[1], 1]]
+            if state.board.N % 2 == 0 and np.count_nonzero(state.board.board[:, position[1]] == 1) == (
+                    state.board.N / 2):
+                return [[position[0], position[1], 0]]
+            if state.board.N % 2 == 0 and np.count_nonzero(state.board.board[:, position[1]] == 0) == (
+                    state.board.N / 2):
+                return [[position[0], position[1], 1]]
+            if state.board.N % 2 == 1 and np.count_nonzero(state.board.board[position[0]] == 1) == int(
+                    state.board.N / 2) + 1:
+                return [[position[0], position[1], 0]]
+            if state.board.N % 2 == 1 and np.count_nonzero(state.board.board[position[0]] == 0) == int(
+                    state.board.N / 2) + 1:
+                return [[position[0], position[1], 1]]
+            if state.board.N % 2 == 1 and np.count_nonzero(state.board.board[:, position[1]] == 1) == int(
+                    state.board.N / 2) + 1:
+                return [[position[0], position[1], 0]]
+            if state.board.N % 2 == 1 and np.count_nonzero(state.board.board[:, position[1]] == 0) == int(
+                    state.board.N / 2) + 1:
+                return [[position[0], position[1], 1]]
 
         actions = []
 
@@ -177,8 +199,8 @@ class Takuzu(Problem):
 
         # Checks if there are any three consecutive equal positions
         positions = []
-        for x in range(0, state.board.N - 1):
-            for y in range(0, state.board.N - 1):
+        for x in range(0, state.board.N):
+            for y in range(0, state.board.N):
                 positions.append([x, y])
 
         for position in positions:
@@ -188,10 +210,19 @@ class Takuzu(Problem):
                     board[position[0]][position[1]] == vertical[0] == vertical[1]:
                 return False
 
-        # Checks if all rows are different
 
+
+        # Checks if all rows are different
+        unique_rows = np.unique(board, axis=0)
+        for row in board:
+            if (row not in unique_rows):
+                return False
 
         # Checks if all columns are different
+        unique_columns = np.unique(board, axis=1)
+        for column in np.transpose(board):
+            if (column not in unique_columns):
+                return False
 
         return True
 
@@ -210,5 +241,9 @@ if __name__ == "__main__":
     problem = Takuzu(board)
     goal_node = depth_first_tree_search(problem)
 
-    print("Is goal?", problem.goal_test(goal_node.state))
-    print("Solution:\n", goal_node.state.board.board, sep="")
+    for x in range(0, goal_node.state.board.N):
+        for y in range(0, goal_node.state.board.N):
+            if y == (goal_node.state.board.N - 1):
+                print(int(goal_node.state.board.board[x][y]), end='\n')
+            else:
+                print(int(goal_node.state.board.board[x][y]), end='\t')
