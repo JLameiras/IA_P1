@@ -78,7 +78,7 @@ class Board:
             > stdin.readline()
         """
         with open(sys.argv[1], 'r') as f:
-            N = int(f.readline()[0])
+            N = int(f.readline())
             boardLines = f.readlines()
 
         board = np.empty((N, N))
@@ -103,45 +103,30 @@ class Takuzu(Problem):
         partir do estado passado como argumento."""
 
         board = state.board.board
-        initialBoard = np.copy(board)
-
         actions = []
 
         emptyCells = np.dstack(np.where(board == 2))[0]
 
-        # enquanto há jogadas 100% obrigatorias o dfs finge que nao ve o resto e gera só 1 nó filho.
-        # alterar o tabeleiro diretamente vai contra o proposito disto apesar de ir dar ao mesmo, era uma das cenas
-        # que estava a dar dor de cabeça
+        # forces move by generating only one child node
         for position in emptyCells:
             if(state.board.adjacent_horizontal_numbers(position[0], position[1])[0] == state.board.adjacent_horizontal_numbers(position[0], position[1])[1] and
             state.board.adjacent_horizontal_numbers(position[0], position[1])[0] != 2):
-                state.board.board = np.copy(initialBoard)
                 return [[position[0], position[1], int(not state.board.adjacent_horizontal_numbers(position[0], position[1])[0])]]
             if (state.board.adjacent_vertical_numbers(position[0], position[1])[0] == state.board.adjacent_vertical_numbers(position[0], position[1])[1] and
             state.board.adjacent_vertical_numbers(position[0], position[1])[1] != 2):
-                state.board.board = np.copy(initialBoard)
                 return [[position[0], position[1], int(not state.board.adjacent_vertical_numbers(position[0], position[1])[0])]]
+            if position[1] >= 2 and state.board.board[position[0]][position[1] - 1] == state.board.board[position[0]][position[1] - 2] and state.board.board[position[0]][position[1] - 2] != 2:
+                return [[position[0], position[1], int(not state.board.board[position[0]][position[1] - 2])]]
+            if position[1] <= state.board.N - 3 and state.board.board[position[0]][position[1] + 1] == state.board.board[position[0]][position[1] + 2] and state.board.board[position[0]][position[1] + 2] != 2:
+                return [[position[0], position[1], int(not state.board.board[position[0]][position[1] + 2])]]
+            if position[0] >= 2 and state.board.board[position[0] - 1][position[1]] == state.board.board[position[0] - 2][position[1]] and state.board.board[position[0] - 2][position[1]] != 2:
+                return [[position[0], position[1], int(not state.board.board[position[0] - 2][position[1]])]]
+            if position[0] <= state.board.N - 3 and state.board.board[position[0] + 1][position[1]] == state.board.board[position[0] + 2][position[1]] and state.board.board[position[0] + 2][position[1]] != 2:
+                return [[position[0], position[1], int(not state.board.board[position[0] + 2][position[1]])]]
+
+        for position in emptyCells:
             actions.append([position[0], position[1], 1])
             actions.append([position[0], position[1], 0])
-
-        # falta adicionar estas em cima para correr testes com numero de 2s alto, exponencial
-        # andar duas casas para direita/esq/cima/baixo
-        """else:
-                if value == horizontal[0] and horizontal[1] == 2:
-                    actions.append([position[0] + 1, position[1], int(not value)])
-                    board[(position[0] + 1, position[1])] = int(not value)
-                if value == horizontal[1] and horizontal[0] == 2:
-                    actions.append([position[0] - 1, position[1], int(not value)])
-                    board[(position[0] - 1, position[1])] = int(not value)
-                if value == vertical[0] and vertical[1] == 2:
-                    actions.append([position[0], position[1] + 1, int(not value)])
-                    board[(position[0], position[1] + 1)] = int(not value)
-                if value == vertical[1] and vertical[0] == 2:
-                    actions.append([position[0], position[1] - 1, int(not value)])
-                    board[(position[0], position[1] - 1)] = int(not value)"""
-
-        # Restore board to initial state (y?)
-        state.board.board = np.copy(initialBoard)
 
         return actions
 
