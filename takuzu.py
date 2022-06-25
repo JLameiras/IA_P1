@@ -184,11 +184,12 @@ class Takuzu(Problem):
         for position in positions:
             horizontal = state.board.adjacent_horizontal_numbers(position[0], position[1])
             vertical = state.board.adjacent_vertical_numbers(position[0], position[1])
-            if board[position[0], position[1]] == horizontal[0] == horizontal[1] or \
-                    board[position[0], position[1]] == vertical[0] == vertical[1]:
+            if board[position[0]][position[1]] == horizontal[0] == horizontal[1] or \
+                    board[position[0]][position[1]] == vertical[0] == vertical[1]:
                 return False
 
         # Checks if all rows are different
+
 
         # Checks if all columns are different
 
