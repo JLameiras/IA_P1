@@ -1,21 +1,15 @@
-# takuzu.py: Template para implementação do projeto de Inteligência Artificial 2021/2022.
-# Devem alterar as classes e funções neste ficheiro de acordo com as instruções do enunciado.
-# Além das funções e classes já definidas, podem acrescentar outras que considerem pertinentes.
-
-# Grupo 00:
+# Grupo 64:
 # 100120 Alexandre Coelho
 # 99540 Pedro Lameiras
 
 import numpy as np
+import sys
+from sys import stdin
 
 from search import (
     Problem,
     Node,
-    # astar_search,
-    # breadth_first_tree_search,
     depth_first_tree_search,
-    # greedy_search,
-    # recursive_best_first_search,
 )
 
 
@@ -27,56 +21,37 @@ class TakuzuState:
         self.id = TakuzuState.state_id
         TakuzuState.state_id += 1
 
-    # Este método é utilizado em caso de empate na gestão da lista de abertos nas procuras informadas.
     def __lt__(self, other):
         return self.id < other.id
 
-    # TODO: outros metodos da classe
-
 
 class Board:
-    """Representação interna de um tabuleiro de Takuzu."""
 
     def __init__(self, N, board):
         self.N = N
         self.board = board
 
     def get_number(self, row: int, col: int) -> int:
-        """Devolve o valor na respetiva posição do tabuleiro."""
         return self.board[row][col]
 
     def adjacent_vertical_numbers(self, row: int, col: int) -> (int, int):
-        """Devolve os valores imediatamente abaixo e acima,
-        respectivamente."""
         if row == 0:
-            return self.board[row + 1][col], None
+            return [self.board[row + 1][col], None]
         if row == (self.N - 1):
-            return None, self.board[row - 1][col]
-        return self.board[row + 1][col], self.board[row - 1][col]
+            return [None, self.board[row - 1][col]]
+        return [self.board[row + 1][col], self.board[row - 1][col]]
 
     def adjacent_horizontal_numbers(self, row: int, col: int) -> (int, int):
-        """Devolve os valores imediatamente à esquerda e à direita,
-        respectivamente."""
         if col == 0:
-            return None, self.board[row][col + 1]
+            return [None, self.board[row][col + 1]]
         if col == (self.N - 1):
-            return self.board[row][col - 1], None
-        return self.board[row][col - 1], self.board[row][col + 1]
+            return [self.board[row][col - 1], None]
+        return [self.board[row][col - 1], self.board[row][col + 1]]
 
     @staticmethod
     def parse_instance_from_stdin():
-        """Lê o test do standard input (stdin) que é passado como argumento
-        e retorna uma instância da classe Board.
-
-        Por exemplo:
-            $ python3 takuzu.py < input_T01
-
-            > from sys import stdin
-            > stdin.readline()
-        """
-        with open(sys.argv[1], 'r') as f:
-            N = int(f.readline())
-            boardLines = f.readlines()
+        N = int(stdin.readline())
+        boardLines = stdin.readlines()
 
         board = np.empty((N, N))
         count = -1
@@ -87,18 +62,12 @@ class Board:
 
         return Board(N, board)
 
-    # TODO: outros metodos da classe
-
 
 class Takuzu(Problem):
     def __init__(self, board: Board):
-        """O construtor especifica o estado inicial."""
         super().__init__(TakuzuState(board))
 
     def actions(self, state: TakuzuState):
-        """Retorna uma lista de ações que podem ser executadas a
-        partir do estado passado como argumento."""
-
         board = state.board.board
         emptyCells = np.dstack(np.where(board == 2))[0]
 
@@ -152,50 +121,31 @@ class Takuzu(Problem):
                     state.board.N / 2) + 1:
                 return [[position[0], position[1], 1]]
 
-        actions = []
-
-        for position in emptyCells:
-            actions.append([position[0], position[1], 1])
-            actions.append([position[0], position[1], 0])
-
-        return actions
+        if np.count_nonzero(board == 2) > 0:
+            return [[emptyCells[0][0], emptyCells[0][1], 1], [emptyCells[0][0], emptyCells[0][1], 0]]
+        else:
+            return []
 
     def result(self, state: TakuzuState, action):
-        """Retorna o estado resultante de executar a 'action' sobre
-        'state' passado como argumento. A ação a executar deve ser uma
-        das presentes na lista obtida pela execução de
-        self.actions(state)."""
-        # TODO
-
         newBoard = np.copy(state.board.board)
-
         newBoard[action[0]][action[1]] = action[2]
-
         newState = TakuzuState(Board(state.board.N, newBoard))
 
         return newState
 
     def goal_test(self, state: TakuzuState):
-        """Retorna True se e só se o estado passado como argumento é
-        um estado objetivo. Deve verificar se todas as posições do tabuleiro
-        estão preenchidas com uma sequência de números adjacentes."""
-
         board = state.board.board
 
-        # Checks if all positions are filled
         if 2 in board:
             return False
 
-        a = np.append(np.count_nonzero(board == 1, axis=0), np.count_nonzero(board == 1, axis=1))
-
-        # Checks whether the number of 1s on each column/row is right
-        for x in a:
+        onesInBoard = np.append(np.count_nonzero(board == 1, axis=0), np.count_nonzero(board == 1, axis=1))
+        for x in onesInBoard:
             if state.board.N % 2 == 0 and x != (state.board.N / 2):
                 return False
             if state.board.N % 2 == 1 and x != int((state.board.N / 2)) and x != (int((state.board.N / 2) + 1)):
                 return False
 
-        # Checks if there are any three consecutive equal positions
         positions = []
         for x in range(0, state.board.N):
             for y in range(0, state.board.N):
@@ -208,15 +158,10 @@ class Takuzu(Problem):
                     board[position[0]][position[1]] == vertical[0] == vertical[1]:
                 return False
 
-
-
-        # Checks if all rows are different
         unique_rows = np.unique(board, axis=0)
         for row in board:
             if (row not in unique_rows):
                 return False
-
-        # Checks if all columns are different
         unique_columns = np.unique(board, axis=1)
         for column in np.transpose(board):
             if (column not in unique_columns):
@@ -229,11 +174,8 @@ class Takuzu(Problem):
         # TODO
         pass
 
-    # TODO: outros metodos da classe
-
 
 if __name__ == "__main__":
-    import sys
 
     board = Board.parse_instance_from_stdin()
     problem = Takuzu(board)
