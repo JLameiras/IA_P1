@@ -103,8 +103,6 @@ class Takuzu(Problem):
         partir do estado passado como argumento."""
 
         board = state.board.board
-        actions = []
-
         emptyCells = np.dstack(np.where(board == 2))[0]
 
         # forces move by generating only one child node
@@ -123,6 +121,8 @@ class Takuzu(Problem):
                 return [[position[0], position[1], int(not state.board.board[position[0] - 2][position[1]])]]
             if position[0] <= state.board.N - 3 and state.board.board[position[0] + 1][position[1]] == state.board.board[position[0] + 2][position[1]] and state.board.board[position[0] + 2][position[1]] != 2:
                 return [[position[0], position[1], int(not state.board.board[position[0] + 2][position[1]])]]
+
+        actions = []
 
         for position in emptyCells:
             actions.append([position[0], position[1], 1])
@@ -162,7 +162,7 @@ class Takuzu(Problem):
 
         #Check if the proportion of 1's and 0's is correct in the grid
         for x in a:
-            if x > state.board.N / 2 + state.board.N % 2:
+            if x > (state.board.N / 2 + state.board.N % 2):
                 return False
 
         #Check if elements respect problem rules
