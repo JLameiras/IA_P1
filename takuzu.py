@@ -6,8 +6,6 @@
 # 100120 Alexandre Coelho
 # 99540 Pedro Lameiras
 
-import sys
-
 import numpy as np
 
 from search import (
@@ -95,7 +93,7 @@ class Board:
 class Takuzu(Problem):
     def __init__(self, board: Board):
         """O construtor especifica o estado inicial."""
-        self.initial = TakuzuState(board)
+        super().__init__(TakuzuState(board))
 
     def actions(self, state: TakuzuState):
         """Retorna uma lista de ações que podem ser executadas a
