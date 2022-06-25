@@ -13,11 +13,11 @@ import numpy as np
 from search import (
     Problem,
     Node,
-    astar_search,
-    breadth_first_tree_search,
+    #astar_search,
+    #breadth_first_tree_search,
     depth_first_tree_search,
-    greedy_search,
-    recursive_best_first_search,
+    #greedy_search,
+    #recursive_best_first_search,
 )
 
 
@@ -103,49 +103,47 @@ class Takuzu(Problem):
         partir do estado passado como argumento."""
 
         board = state.board.board
-        positions = ((x, y) for x in range(0, state.board.N - 1) for y in range(0, state.board.N - 1))
+        initialBoard = np.copy(board)
+
         actions = []
-        print(board)
-        for position in positions:
-            value = board[position]
-            horizontal = state.board.adjacent_horizontal_numbers(position[0], position[1])
-            vertical = state.board.adjacent_vertical_numbers(position[0], position[1])
-            if value == 2:
-                if horizontal[0] == horizontal[1]:
-                    actions.append((position[0], position[1], int(not horizontal[0])))
-                    board[position] = int(not horizontal[0])
-                elif vertical[0] == vertical[1]:
-                    actions.append((position[0], position[1], int(not vertical[0])))
-                    board[position] = int(not vertical[0])
-            else:
-                if value == horizontal[0] and horizontal[1] == 2:
-                    actions.append((position[0] + 1, position[1], int(not value)))
-                    board[(position[0] + 1, position[1])] = int(not value)
-                if value == horizontal[1] and horizontal[0] == 2:
-                    actions.append((position[0] - 1, position[1], int(not value)))
-                    board[(position[0] - 1, position[1])] = int(not value)
-                if value == vertical[0] and vertical[1] == 2:
-                    actions.append((position[0], position[1] + 1, int(not value)))
-                    board[(position[0], position[1] + 1)] = int(not value)
-                if value == vertical[1] and vertical[0] == 2:
-                    actions.append((position[0], position[1] - 1, int(not value)))
-                    board[(position[0], position[1] - 1)] = int(not value)
 
         emptyCells = np.dstack(np.where(board == 2))[0]
-        a = []
 
+        # enquanto há jogadas 100% obrigatorias o dfs finge que nao ve o resto e gera só 1 nó filho.
+        # alterar o tabeleiro diretamente vai contra o proposito disto apesar de ir dar ao mesmo, era uma das cenas
+        # que estava a dar dor de cabeça
         for position in emptyCells:
-            a.append((position[0], position[1], 0))
-            a.append((position[0], position[1], 1))
+            if(state.board.adjacent_horizontal_numbers(position[0], position[1])[0] == state.board.adjacent_horizontal_numbers(position[0], position[1])[1] and
+            state.board.adjacent_horizontal_numbers(position[0], position[1])[0] != 2):
+                state.board.board = np.copy(initialBoard)
+                return [[position[0], position[1], int(not state.board.adjacent_horizontal_numbers(position[0], position[1])[0])]]
+            if (state.board.adjacent_vertical_numbers(position[0], position[1])[0] == state.board.adjacent_vertical_numbers(position[0], position[1])[1] and
+            state.board.adjacent_vertical_numbers(position[0], position[1])[1] != 2):
+                state.board.board = np.copy(initialBoard)
+                return [[position[0], position[1], int(not state.board.adjacent_vertical_numbers(position[0], position[1])[0])]]
+            actions.append([position[0], position[1], 1])
+            actions.append([position[0], position[1], 0])
 
-        # Restore board to initial state
-        for action in actions:
-            board[action[0]][action[1]] = 2
-        print(board)
-        actions.append(a)
-        print(actions[0])
+        # falta adicionar estas em cima para correr testes com numero de 2s alto, exponencial
+        # andar duas casas para direita/esq/cima/baixo
+        """else:
+                if value == horizontal[0] and horizontal[1] == 2:
+                    actions.append([position[0] + 1, position[1], int(not value)])
+                    board[(position[0] + 1, position[1])] = int(not value)
+                if value == horizontal[1] and horizontal[0] == 2:
+                    actions.append([position[0] - 1, position[1], int(not value)])
+                    board[(position[0] - 1, position[1])] = int(not value)
+                if value == vertical[0] and vertical[1] == 2:
+                    actions.append([position[0], position[1] + 1, int(not value)])
+                    board[(position[0], position[1] + 1)] = int(not value)
+                if value == vertical[1] and vertical[0] == 2:
+                    actions.append([position[0], position[1] - 1, int(not value)])
+                    board[(position[0], position[1] - 1)] = int(not value)"""
 
-        return actions[0]
+        # Restore board to initial state (y?)
+        state.board.board = np.copy(initialBoard)
+
+        return actions
 
     def result(self, state: TakuzuState, action):
         """Retorna o estado resultante de executar a 'action' sobre
@@ -154,12 +152,10 @@ class Takuzu(Problem):
         self.actions(state)."""
         # TODO
 
-        if action not in self.actions(state):
-            return None
-
         newBoard = np.copy(state.board.board)
 
-        newBoard[action[0], action[1]] = action[2]
+        newBoard[action[0]][action[1]] = action[2]
+
         newState = TakuzuState(Board(state.board.N, newBoard))
 
         return newState
@@ -181,14 +177,14 @@ class Takuzu(Problem):
 
         #Check if the proportion of 1's and 0's is correct in the grid
         for x in a:
-            if x > board.N / 2 + board.N % 2:
+            if x > state.board.N / 2 + state.board.N % 2:
                 return False
 
         #Check if elements respect problem rules
         positions = ((x, y) for x in range(0, state.board.N - 1) for y in range(0, state.board.N - 1))
         for position in positions:
-            horizontal = Board.adjacent_horizontal_numbers(position[0], position[1])
-            vertical = Board.adjacent_vertical_numbers(position[0], position[1])
+            horizontal = state.board.adjacent_horizontal_numbers(position[0], position[1])
+            vertical = state.board.adjacent_vertical_numbers(position[0], position[1])
             if board[position[0], position[1]] == horizontal[0] == horizontal[1] or \
             board[position[0], position[1]] == vertical[0] == vertical[1]:
                 return False
@@ -205,11 +201,12 @@ class Takuzu(Problem):
 
 if __name__ == "__main__":
     import sys
-    # Ler o ficheiro de input de sys.argv[1],
+
     board = Board.parse_instance_from_stdin()
     problem = Takuzu(board)
-    goal = depth_first_tree_search(problem)
-    # Usar uma técnica de procura para resolver a instância,
-    # Retirar a solução a partir do nó resultante,
-    # Imprimir para o standard output no formato indicado.
+    goal_node = depth_first_tree_search(problem)
+
+    print("Is goal?", problem.goal_test(goal_node.state))
+    print("Solution:\n", goal_node.state.board.board, sep="")
+
 
